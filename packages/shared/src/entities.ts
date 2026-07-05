@@ -20,6 +20,7 @@ export const createCompanySchema = z.object({
 });
 export type CreateCompanyInput = z.infer<typeof createCompanySchema>;
 export const updateCompanySchema = createCompanySchema.partial();
+export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 
 export const createContactSchema = z.object({
   companyId: z.string().cuid().optional(),
@@ -37,19 +38,23 @@ export const createContactSchema = z.object({
 });
 export type CreateContactInput = z.infer<typeof createContactSchema>;
 export const updateContactSchema = createContactSchema.partial();
+export type UpdateContactInput = z.infer<typeof updateContactSchema>;
 
 export const createListSchema = z.object({
   name: z.string().min(1).max(120),
   type: z.enum(['COMPANY', 'CONTACT']),
 });
+export type CreateListInput = z.infer<typeof createListSchema>;
 
 export const addToListSchema = z.object({
   listId: z.string().cuid(),
   companyIds: z.array(z.string().cuid()).optional(),
   contactIds: z.array(z.string().cuid()).optional(),
 });
+export type AddToListInput = z.infer<typeof addToListSchema>;
 
 export const createTagSchema = z.object({
   name: z.string().min(1).max(60),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#6366f1'),
 });
+export type CreateTagInput = z.infer<typeof createTagSchema>;

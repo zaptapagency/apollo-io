@@ -19,10 +19,12 @@ export const inviteMemberSchema = z.object({
   email: z.string().email(),
   role: orgRoleSchema.default('REP'),
 });
+export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
 
 export const updateMemberRoleSchema = z.object({
   role: orgRoleSchema,
 });
+export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
 
 export const createApiKeySchema = z.object({
   name: z.string().min(1).max(120),
@@ -41,3 +43,4 @@ export const checkoutSessionSchema = z.object({
   plan: z.enum(['free', 'starter', 'growth', 'enterprise']),
   seats: z.number().int().min(1).max(500),
 });
+export type CheckoutSessionInput = z.infer<typeof checkoutSessionSchema>;
