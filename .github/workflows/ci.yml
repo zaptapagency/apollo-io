@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DATABASE_URL: postgresql://prospect:prospect@localhost:5432/prospect?schema=public
+  REDIS_URL: redis://localhost:6379
+  OPENSEARCH_NODE: http://localhost:9200
+  AUTH_SECRET: ci-only-secret-not-for-prod-use-32chars
+
+jobs:
+  build-lint-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: prospect
+          POSTGRES_PASSWORD: prospect
+          POSTGRES_DB: prospect
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U prospect"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @prospect/db exec prisma generate
+
+      - name: Run migrations
+        run: pnpm --filter @prospect/db exec prisma migrate deploy
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit + integration tests
+        run: pnpm test:cov
+
+      - name: Build all workspaces
+        run: pnpm build
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            apps/*/coverage
+            packages/*/coverage
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build-lint-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @prospect/web exec playwright install --with-deps chromium
+
+      - name: Start full stack via docker compose
+        run: docker compose up -d --build
+
+      - name: Wait for services
+        run: |
+          npx wait-on http://localhost:3001/health http://localhost:3000 -t 120000
+
+      - name: Seed demo data
+        run: pnpm db:seed
+        env:
+          SEED_COMPANY_COUNT: 200
+          SEED_CONTACT_COUNT: 1000
+
+      - name: Run Playwright e2e
+        run: pnpm --filter @prospect/web exec playwright test
+
+      - name: Docker compose logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
