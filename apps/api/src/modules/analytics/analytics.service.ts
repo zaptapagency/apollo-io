@@ -26,7 +26,7 @@ export class AnalyticsService {
         const count = await this.prisma.client.deal.count({
           where: {
             ...where,
-            pipelineStageId: stage.id,
+            stageId: stage.id,
           },
         });
         return {
