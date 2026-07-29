@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
+import { PrismaModule } from '../../prisma/prisma.module';
+import { AnalyticsService } from './analytics.service';
 
-// Workstream D fills this in: sequence performance, mailbox health, rep leaderboards,
-// funnel conversion, cohort charts (reads DailyMetric + live aggregates).
-@Module({})
+@Module({
+  imports: [PrismaModule],
+  providers: [AnalyticsService],
+  exports: [AnalyticsService],
+})
 export class AnalyticsModule {}

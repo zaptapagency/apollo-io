@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
+import { PrismaModule } from '../../prisma/prisma.module';
+import { DealsService } from './deals.service';
+import { PipelineService } from './pipeline.service';
 
-// Workstream D fills this in: accounts/deals/pipeline stages (kanban), tasks, activity
-// timeline, notes, custom fields.
-@Module({})
+@Module({
+  imports: [PrismaModule],
+  providers: [DealsService, PipelineService],
+  exports: [DealsService, PipelineService],
+})
 export class CrmModule {}
