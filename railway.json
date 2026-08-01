@@ -5,7 +5,6 @@
     "dockerfilePath": "./apps/api/Dockerfile"
   },
   "deploy": {
-    "startCommand": "sh -c 'cd /repo/packages/db && npx prisma migrate deploy && node /repo/apps/api/dist/main.js'",
     "restartPolicyMaxRetries": 5
   }
 }
