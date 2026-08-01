@@ -70,6 +70,7 @@ model User {
   authoredNotes     Note[]
   activities        Activity[]
   sequenceSteps     SequenceEnrollment[] @relation("EnrollmentOwner")
+  ownedDeals        Deal[]            @relation("DealOwner")
   sessions          Session[]
 
   @@map("users")
@@ -685,6 +686,8 @@ model Deal {
   company        Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
   contactId      String?
   contact        Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  ownerId        String?
+  owner          User?         @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   stageId        String
   stage          PipelineStage @relation(fields: [stageId], references: [id])
   amountUsd      Int           @default(0)
@@ -698,6 +701,7 @@ model Deal {
   customValues CustomFieldValue[]
 
   @@index([organizationId, stageId])
+  @@index([organizationId, ownerId])
   @@map("deals")
 }
 

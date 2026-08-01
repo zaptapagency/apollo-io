@@ -82,12 +82,13 @@ export class AnalyticsService {
   }
 
   async getRepLeaderboard(organizationId: string, dateRange?: { from: Date; to: Date }) {
-    const where: { organizationId: string; createdAt?: { gte: Date; lte: Date } } = {
+    const dealWhere: { organizationId: string; ownerId?: string; createdAt?: { gte: Date; lte: Date }; stage?: { isWon: boolean } } = {
       organizationId,
+      stage: { isWon: true },
     };
 
     if (dateRange) {
-      where.createdAt = {
+      dealWhere.createdAt = {
         gte: dateRange.from,
         lte: dateRange.to,
       };
@@ -105,8 +106,8 @@ export class AnalyticsService {
       reps.map(async (rep) => {
         const dealsWon = await this.prisma.client.deal.count({
           where: {
-            organizationId,
-            stage: { name: 'Won' },
+            ...dealWhere,
+            ownerId: rep.id,
           },
         });
 

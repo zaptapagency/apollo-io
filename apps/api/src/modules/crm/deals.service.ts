@@ -14,6 +14,7 @@ export class DealsService {
       name: string;
       amountUsd?: number;
       stageId: string;
+      ownerId?: string;
     },
   ) {
     const stage = await this.prisma.client.pipelineStage.findUnique({
@@ -31,6 +32,7 @@ export class DealsService {
         name: data.name,
         amountUsd: data.amountUsd || 0,
         stageId: data.stageId,
+        ownerId: data.ownerId,
       },
     });
   }
@@ -55,14 +57,16 @@ export class DealsService {
       name?: string;
       amountUsd?: number;
       stageId?: string;
+      ownerId?: string;
     },
   ) {
     await this.getDeal(organizationId, dealId);
 
-    const updateData: { name?: string; amountUsd?: number; stageId?: string } = {};
+    const updateData: { name?: string; amountUsd?: number; stageId?: string; ownerId?: string } = {};
     if (data.name) updateData.name = data.name;
     if (data.amountUsd !== undefined) updateData.amountUsd = data.amountUsd;
     if (data.stageId) updateData.stageId = data.stageId;
+    if (data.ownerId !== undefined) updateData.ownerId = data.ownerId;
 
     return this.prisma.client.deal.update({
       where: { id: dealId },
