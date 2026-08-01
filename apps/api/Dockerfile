@@ -21,6 +21,4 @@ ENV NODE_ENV=production
 COPY --from=build /repo /repo
 WORKDIR /repo/apps/api
 EXPOSE 3001
-
-# Run migrations and start the app
-CMD sh -c "cd /repo/packages/db && npx prisma migrate deploy && node /repo/apps/api/dist/main.js"
+CMD ["node", "dist/main.js"]
