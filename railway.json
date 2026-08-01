@@ -6,6 +6,7 @@
   },
   "deploy": {
     "startCommand": "node dist/main.js",
+    "preDeployCommand": "cd /repo/packages/db && npx prisma migrate deploy",
     "healthcheckPath": "/health",
     "restartPolicyMaxRetries": 5
   }
